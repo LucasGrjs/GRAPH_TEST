@@ -1,0 +1,15 @@
+digraph G {
+  rankdir=TB;
+  0 [style=filled, fillcolor=black, fontcolor=white];
+  0 -> 1 [color=black];
+  0 -> 2 [color=black];
+  2 -> 3 [color=black];
+  2 -> 4 [color=black];
+  3 -> 5 [color=black];
+  0 [style=filled, fillcolor=green]
+  1 [style=filled, fillcolor=red]
+  2 [style=filled, fillcolor=blue]
+  3 [style=filled, fillcolor=blue]
+  4 [style=filled, fillcolor=blue]
+  5 [style=filled, fillcolor=blue]
+}
