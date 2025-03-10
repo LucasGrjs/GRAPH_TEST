@@ -668,7 +668,6 @@ public class DAGPartitioning {
         if (clusters.size() <= cluster_number) {
             return clusters; // Already at or below the required number
         }
-    
         // Get cluster levels
         Map<Integer, Integer> clusterLevels = computeClusterLevels(clusters, longuestPath, adjacencyList);
         // Group clusters by level
@@ -811,7 +810,7 @@ public class DAGPartitioning {
     }
 
     public static void main(String[] args) {
-        int node_number = 6;
+        int node_number = 60;
         int cluster_number = 5;
         int[][] edges = generateRandomReverseTree(node_number); // Générer des arêtes aléatoires
 
