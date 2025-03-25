@@ -1,0 +1,150 @@
+digraph G {
+  rankdir=TB;
+  32 [style=filled, fillcolor=black, fontcolor=white];
+  34 [style=filled, fillcolor=black, fontcolor=white];
+  35 [style=filled, fillcolor=black, fontcolor=white];
+  36 [style=filled, fillcolor=black, fontcolor=white];
+  4 [style=filled, fillcolor=black, fontcolor=white];
+  37 [style=filled, fillcolor=black, fontcolor=white];
+  38 [style=filled, fillcolor=black, fontcolor=white];
+  39 [style=filled, fillcolor=black, fontcolor=white];
+  40 [style=filled, fillcolor=black, fontcolor=white];
+  41 [style=filled, fillcolor=black, fontcolor=white];
+  42 [style=filled, fillcolor=black, fontcolor=white];
+  24 [style=filled, fillcolor=black, fontcolor=white];
+  25 [style=filled, fillcolor=black, fontcolor=white];
+  26 [style=filled, fillcolor=black, fontcolor=white];
+  28 [style=filled, fillcolor=black, fontcolor=white];
+  29 [style=filled, fillcolor=black, fontcolor=white];
+  30 [style=filled, fillcolor=black, fontcolor=white];
+  31 [style=filled, fillcolor=black, fontcolor=white];
+  24 -> 45 [color=black];
+  24 -> 39 [color=black];
+  45 -> 44 [color=black];
+  45 -> 46 [color=black];
+  39 -> 50 [color=black];
+  39 -> 38 [color=black];
+  50 -> 57 [color=black];
+  50 -> 51 [color=black];
+  38 -> 55 [color=black];
+  38 -> 40 [color=black];
+  55 -> 47 [color=black];
+  55 -> 56 [color=black];
+  40 -> 52 [color=black];
+  40 -> 42 [color=black];
+  47 -> 49 [color=black];
+  47 -> 48 [color=black];
+  52 -> 53 [color=black];
+  52 -> 54 [color=black];
+  42 -> 63 [color=black];
+  42 -> 62 [color=black];
+  42 -> 41 [color=black];
+  41 -> 58 [color=black];
+  58 -> 59 [color=black];
+  58 -> 61 [color=black];
+  41 -> 37 [color=black];
+  37 -> 64 [color=black];
+  64 -> 60 [color=black];
+  64 -> 65 [color=black];
+  36 -> 66 [color=black];
+  36 -> 35 [color=black];
+  35 -> 68 [color=black];
+  35 -> 34 [color=black];
+  68 -> 69 [color=black];
+  34 -> 17 [color=black];
+  34 -> 32 [color=black];
+  32 -> 22 [color=black];
+  32 -> 9 [color=black];
+  32 -> 31 [color=black];
+  22 -> 23 [color=black];
+  22 -> 21 [color=black];
+  9 -> 11 [color=black];
+  9 -> 15 [color=black];
+  11 -> 13 [color=black];
+  11 -> 10 [color=black];
+  13 -> 14 [color=black];
+  13 -> 12 [color=black];
+  37 -> 36 [color=black];
+  31 -> 18 [color=black];
+  31 -> 30 [color=black];
+  18 -> 19 [color=black];
+  18 -> 20 [color=black];
+  30 -> 16 [color=black];
+  30 -> 29 [color=black];
+  29 -> 2 [color=black];
+  29 -> 4 [color=black];
+  2 -> 1 [color=black];
+  2 -> 3 [color=black];
+  4 -> 28 [color=black];
+  28 -> 5 [color=black];
+  28 -> 26 [color=black];
+  5 -> 7 [color=black];
+  5 -> 6 [color=black];
+  26 -> 8 [color=black];
+  26 -> 25 [color=black];
+  1 [style=filled, fillcolor=green]
+  2 [style=filled, fillcolor=green]
+  3 [style=filled, fillcolor=green]
+  4 [style=filled, fillcolor=green]
+  5 [style=filled, fillcolor=lightgreen]
+  6 [style=filled, fillcolor=lightgreen]
+  7 [style=filled, fillcolor=lightgreen]
+  8 [style=filled, fillcolor=lightyellow]
+  9 [style=filled, fillcolor=red]
+  10 [style=filled, fillcolor=red]
+  11 [style=filled, fillcolor=red]
+  12 [style=filled, fillcolor=red]
+  13 [style=filled, fillcolor=red]
+  14 [style=filled, fillcolor=red]
+  15 [style=filled, fillcolor=red]
+  16 [style=filled, fillcolor=gold]
+  17 [style=filled, fillcolor=firebrick]
+  18 [style=filled, fillcolor=pink]
+  19 [style=filled, fillcolor=pink]
+  20 [style=filled, fillcolor=pink]
+  21 [style=filled, fillcolor=magenta]
+  22 [style=filled, fillcolor=magenta]
+  23 [style=filled, fillcolor=magenta]
+  24 [style=filled, fillcolor=yellow]
+  25 [style=filled, fillcolor=lightyellow]
+  26 [style=filled, fillcolor=lightyellow]
+  28 [style=filled, fillcolor=lightgreen]
+  29 [style=filled, fillcolor=green]
+  30 [style=filled, fillcolor=gold]
+  31 [style=filled, fillcolor=pink]
+  32 [style=filled, fillcolor=magenta]
+  34 [style=filled, fillcolor=firebrick]
+  35 [style=filled, fillcolor=lightblue]
+  36 [style=filled, fillcolor=darkgreen]
+  37 [style=filled, fillcolor=cyan]
+  38 [style=filled, fillcolor=blue]
+  39 [style=filled, fillcolor=orange]
+  40 [style=filled, fillcolor=purple]
+  41 [style=filled, fillcolor=brown]
+  42 [style=filled, fillcolor=darkblue]
+  44 [style=filled, fillcolor=yellow]
+  45 [style=filled, fillcolor=yellow]
+  46 [style=filled, fillcolor=yellow]
+  47 [style=filled, fillcolor=blue]
+  48 [style=filled, fillcolor=blue]
+  49 [style=filled, fillcolor=blue]
+  50 [style=filled, fillcolor=orange]
+  51 [style=filled, fillcolor=orange]
+  52 [style=filled, fillcolor=purple]
+  53 [style=filled, fillcolor=purple]
+  54 [style=filled, fillcolor=purple]
+  55 [style=filled, fillcolor=blue]
+  56 [style=filled, fillcolor=blue]
+  57 [style=filled, fillcolor=orange]
+  58 [style=filled, fillcolor=brown]
+  59 [style=filled, fillcolor=brown]
+  60 [style=filled, fillcolor=cyan]
+  61 [style=filled, fillcolor=brown]
+  62 [style=filled, fillcolor=coral]
+  63 [style=filled, fillcolor=darkblue]
+  64 [style=filled, fillcolor=cyan]
+  65 [style=filled, fillcolor=cyan]
+  66 [style=filled, fillcolor=darkgreen]
+  68 [style=filled, fillcolor=lightblue]
+  69 [style=filled, fillcolor=lightblue]
+}
