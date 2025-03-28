@@ -1,2 +1,7 @@
 *.class
 GRID/Nematode.class
+*.lst
+*.jar
+*.dot
+*.dot
+*.class
