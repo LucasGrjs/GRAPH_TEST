@@ -178,35 +178,38 @@ public class DAGPartitioning {
             Set<Integer> pathNodes = new HashSet<>(longestPath);
             Map<Integer, String> nodeColors = new HashMap<>();
             String[] colors = {
-                "red", "blue", "green", "orange", "magenta",
-                "purple", "brown", "cyan", "pink", "lightgreen", "lightblue", "lightyellow", "darkblue", "darkgreen",
+                "blue", "green", "orange", "magenta", "purple", 
+                "brown", "cyan", "pink", "lightgreen", "darkblue", 
                 "firebrick", "gold", "coral", "salmon", "sienna", "chocolate", "peru", "tan", "khaki", "olivedrab",
                 "limegreen", "seagreen", "teal", "steelblue", "skyblue", "royalblue", "slateblue", "violet", "plum", "orchid",
                 "thistle", "lavender", "mistyrose", "lemonchiffon", "palegreen", "paleturquoise", "aliceblue", "azure", "ivory", "beige", "yellow"
             };
             int colorIndex = 0;
 
-            // Assign colors based on individual subtrees
-            for (List<Integer> subtree : clusters) {
+            // First assign colors to cluster nodes (except critical path nodes)
+            for (List<Integer> cluster : clusters) {
                 String color = colors[colorIndex % colors.length];
                 colorIndex++;
-                for (int node : subtree) {
-                    nodeColors.put(node, color); // Color all nodes in the subtree
+                for (int node : cluster) {
+                    if (!pathNodes.contains(node)) {  // Skip critical path nodes
+                        nodeColors.put(node, color);
+                    }
                 }
             }
 
+            // Then set all critical path nodes to red (overriding any previous color)
             for (int node : pathNodes) {
-                writer.write("  " + node + " [style=filled, fillcolor=black, fontcolor=white];\n");
+                nodeColors.put(node, "red");
             }
 
+            // Write all nodes with their colors
+            for (Map.Entry<Integer, String> entry : nodeColors.entrySet()) {
+                writer.write("  " + entry.getKey() + " [style=filled, fillcolor=" + entry.getValue() + "]\n");
+            }
+
+            // Write edges
             for (int[] edge : edges) {
-                int from = edge[1];
-                int to = edge[0];
-                writer.write("  " + from + " -> " + to + " [color=black];\n");
-            }
-
-            for (int node : nodeColors.keySet()) {
-                writer.write("  " + node + " [style=filled, fillcolor=" + nodeColors.get(node) + "]\n");
+                writer.write("  " + edge[0] + " -> " + edge[1] + ";\n");
             }
 
             writer.write("}\n");
@@ -811,7 +814,7 @@ public class DAGPartitioning {
 
     public static void main(String[] args) {
         int node_number = 50;
-        int cluster_number = 4;
+        int cluster_number = 8;
         //int[][] edges = generateRandomReverseTree(node_number); // Générer des arêtes aléatoires
         
         int[][] edges = {
@@ -820,24 +823,24 @@ public class DAGPartitioning {
             {57,50}, {51,50}, {55,38}, {40,38},
             {47,55}, {56,55}, {52,40}, {42,40},
             {49,47}, {48,47}, {53,52}, {54,52},
-            {63,42}, {62,42}, {41,42},
+            {63,42}, {62,42}, {41,42} ,
             {58,41},{59,58},{61,58},
-            {37,41}, {64,37}, {60,64}, {65,64},
-            {66,36}, {35,36}, {68,35}, {34,35},
+            {37,41}, {64,37}, {60,64}, {65,64} ,
+            {66,36}, {35,36}, {36,37},
+            /*{68,35}, {34,35},
             {69,68}, {17,34}, {32,34},
             {22,32}, {9,32}, {31,32},
             {23,22}, {21,22}, {11,9}, {15,9},
             {13,11}, {10,11}, {14,13}, {12,13},
-            {36,37},
             {18,31}, {30,31}, {19,18}, {20,18},
             {16,30}, {29,30}, {2,29}, {4,29},
             {1,2}, {3,2}, {28,4},
             {5,28}, {26,28}, {7,5}, {6,5},
-            {8,26}, {25,26}
+            {8,26}, {25,26}*/
         };
 
         TreeNode root = buildTreeFromEdges(edges); // Construire l'arbre à partir des arêtes
-        List<List<Integer>> clusters = partitionTreeIntoClusters(edges, root, cluster_number, "graph_output"); // Partitionner l'arbre en clusters et générer l'image
+        List<List<Integer>> clusters = partitionTreeIntoClusters(edges, root, cluster_number, "dagpartitionning"); // Partitionner l'arbre en clusters et générer l'image
 
         System.out.println("FINAL CLUSTER ");
         int node = 0;

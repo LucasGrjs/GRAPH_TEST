@@ -10,7 +10,7 @@ class TreeNode {
     }
 }
 
-class DAGPartitioning 
+class DAGPartitioning_main 
 {
     public static List<List<Integer>> partitionGraphWithDependencies(int[][] edges, int numClusters) {
         // Step 1: Build adjacency list
@@ -96,7 +96,6 @@ class DAGPartitioning
     }
     public static void main(String[] args) {
         
-        TreePartitioner partitioner = new TreePartitioner();
         int node_number = 200;
         int[][] edges = generateRandomReverseTree(node_number); // Générer des arêtes aléatoires
 

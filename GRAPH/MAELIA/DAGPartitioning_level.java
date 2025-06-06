@@ -174,7 +174,7 @@ class DAGPartitioning_level
             writer.write("digraph G {\n");
             writer.write("  rankdir=TB;\n");
 
-            String[] colors = {"red", "blue", "green", "yellow", "orange", "purple", "cyan", "magenta"};
+            String[] colors = {"red", "blue", "green", "yellow", "orange", "purple", "cyan", "magenta", "pink", "brown", "gold", "silver"};
             Map<Integer, String> nodeColors = new HashMap<>();
 
             for (int i = 0; i < clusters.size(); i++) {
@@ -277,21 +277,60 @@ class DAGPartitioning_level
         return exceedingClusters; // Return the list of exceeding clusters
     }
 
+    // Add function to print topological order
+    public static void printTopologicalSort(int[][] edges) {
+        // Build adjacency list and inDegree map with reversed edges: treat edge[0] as parent, edge[1] as child
+        Map<Integer, List<Integer>> adjacencyList = new HashMap<>();
+        Map<Integer, Integer> inDegree = new HashMap<>();
+        Set<Integer> allNodes = new HashSet<>();
+        for (int[] edge : edges) {
+             int parent = edge[0];
+             int child = edge[1];
+             adjacencyList.computeIfAbsent(parent, k -> new ArrayList<>()).add(child);
+             inDegree.put(child, inDegree.getOrDefault(child, 0) + 1);
+             inDegree.putIfAbsent(parent, 0);
+             allNodes.add(parent);
+             allNodes.add(child);
+        }
+        // Topological sort using a queue
+        Queue<Integer> queue = new LinkedList<>();
+        for (int node : allNodes) {
+             if (inDegree.get(node) == 0) {
+                  queue.add(node);
+             }
+        }
+        List<Integer> topoOrder = new ArrayList<>();
+        while (!queue.isEmpty()){
+             int node = queue.poll();
+             topoOrder.add(node);
+             if (adjacencyList.containsKey(node)){
+                  for (int neighbor : adjacencyList.get(node)) {
+                       inDegree.put(neighbor, inDegree.get(neighbor) - 1);
+                       if (inDegree.get(neighbor) == 0) {
+                            queue.add(neighbor);
+                       }
+                  }
+             }
+        }
+        System.out.println("Topological Order: " + topoOrder);
+    }
+
     public static void main(String[] args) {
         
         int node_number = 60;
-        int cluster_number = 6;
+        int cluster_number = 4;
         String outputFileName = "level";
         //int[][] edges = generateRandomReverseTree(node_number); // Générer des arêtes aléatoires
 
         int[][] edges = {
-            {45,24}, {39,24}, 
+            /*{45,24}, {39,24}, 
             {44,45}, {46,45}, {50,39}, {38,39},
             {57,50}, {51,50}, {55,38}, {40,38},
             {47,55}, {56,55}, {52,40}, {42,40},
             {49,47}, {48,47}, {53,52}, {54,52},
-            {63,42}, {62,42}, {41,42},
-            {58,41},{59,58},{61,58},
+            {63,42}, {62,42}, {41,42},*/
+
+            /*{58,41},{59,58},{61,58},
             {37,41}, {64,37}, {60,64}, {65,64},
             {66,36}, {35,36}, {68,35}, {34,35},
             {69,68}, {17,34}, {32,34},
@@ -303,11 +342,67 @@ class DAGPartitioning_level
             {16,30}, {29,30}, {2,29}, {4,29},
             {1,2}, {3,2}, {28,4},
             {5,28}, {26,28}, {7,5}, {6,5},
-            {8,26}, {25,26}
-        };
+            {8,26}, {25,26}*/
 
+            {2043, 2040},
+            {2039, 2040},
+            {2040, 3451},
+            {3450, 3451},
+            {3451, 2044},
+            {2407, 2044},
+            {2044, 2045},
+            {2398, 2045},
+            {2045, 1681},
+            {4295, 1680},
+            {4280, 4295},
+            {4422, 4280},
+            {4653, 4280},
+            {1680, 183},
+            {1681, 114},
+            {183, 114},
+            {114, 115},
+            {1600, 115},
+            {115, 192},
+            {574, 575},
+            {575, 193},
+            {192, 193},
+            {193, 2265},
+            {2265, 2402},
+            {2402, 4},
+            {4709, 1857},
+            {1857, 1444},
+            {1444, 198},
+            {4, 1444},
+            {197, 198},
+            {198, 3420},
+            {4649, 3420},
+            {3420, 110},
+            {201, 110},
+            {208, 110},
+            {110, 111},
+            {194, 195},
+            {2072, 195},
+            {2072, 4709},
+            {549, 550},
+            {4570, 550},
+            {550, 837},
+            {3890, 838},
+            {837, 838},
+            {2023, 2024},
+            {838, 2025},
+            {2024, 2025},
+            {2025, 2032},
+            {2031, 2032},
+            {2032, 2036},
+            {2036, 3},
+            {23, 3},
+            {2027, 23},
+            {3, 4}
+
+        };
         System.out.println("edges");
         List<List<Integer>> clusters = partitionGraphWithDependencies(edges, cluster_number);
+        printTopologicalSort(edges);
 
         generateGraphPNG(edges,clusters,outputFileName);
         getClusterSizeDifferences(clusters);

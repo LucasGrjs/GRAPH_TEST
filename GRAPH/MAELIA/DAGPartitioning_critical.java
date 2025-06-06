@@ -12,7 +12,7 @@ class TreeNode {
     }
 }
 
-public class DAGPartitioning_upd {
+public class DAGPartitioning_critical {
 
     private static Map<Integer, List<Integer>> buildAdjacencyListFromTree(TreeNode root) {
         Map<Integer, List<Integer>> adjacencyList = new HashMap<>();
@@ -169,52 +169,76 @@ public class DAGPartitioning_upd {
         }
     }
 
+    // Reworked generatePngFromGraph method to generate the same graph as DAGPartitioning_level.java:
     public static void generatePngFromGraph(int[][] edges, List<Integer> longestPath, List<List<Integer>> clusters, String outputFileName, Map<Integer, List<Integer>> adjacencyList) {
         try {
             BufferedWriter writer = new BufferedWriter(new FileWriter(outputFileName + ".dot"));
             writer.write("digraph G {\n");
             writer.write("  rankdir=TB;\n");
-
-            Set<Integer> pathNodes = new HashSet<>(longestPath);
-            Map<Integer, String> nodeColors = new HashMap<>();
+            
             String[] colors = {
-                "red", "blue", "green", "yellow", "orange",
-                "purple", "brown", "cyan", "magenta", "pink", "lightgreen", "lightblue", "lightyellow", "darkblue", "darkgreen",
-                "firebrick", "gold", "coral", "salmon", "sienna", "chocolate", "peru", "tan", "khaki", "olivedrab",
-                "limegreen", "seagreen", "teal", "steelblue", "skyblue", "royalblue", "slateblue", "violet", "plum", "orchid",
-                "thistle", "lavender", "mistyrose", "lemonchiffon", "palegreen", "paleturquoise", "aliceblue", "azure", "ivory", "beige"
+                "yellow", "blue", "green", "orange", "purple", "cyan", 
+                "magenta", "pink", "brown", "gold", "silver", "red",
+                "violet", "indigo", "coral", "crimson", "darkgreen", "darkcyan",
+                "darkblue", "darkmagenta", "darkred", "darkorange", "olive", "teal",
+                "navy", "maroon", "aquamarine", "turquoise", "salmon", "sienna",
+                "chocolate", "firebrick", "steelblue", "lightsalmon", "palegreen", "orchid",
+                "plum", "khaki", "powderblue", "paleturquoise", "rosybrown", "goldenrod",
+                "mediumorchid", "darkkhaki", "indianred", "mediumseagreen", "darkseagreen", "lightcoral",
+                "mediumpurple", "cadetblue"
             };
-            int colorIndex = 0;
-
-            // Assign colors based on individual subtrees
-            for (List<Integer> subtree : clusters) {
-                String color = colors[colorIndex % colors.length];
-                colorIndex++;
-                for (int node : subtree) {
-                    nodeColors.put(node, color); // Color all nodes in the subtree
+            
+            Map<Integer, String> nodeColors = new HashMap<>();
+            
+            // Assign one color per cluster
+            for (int i = 0; i < clusters.size(); i++) {
+                String color = colors[i % colors.length];
+                for (int node : clusters.get(i)) {
+                    nodeColors.put(node, color);
                 }
             }
-
-            for (int node : pathNodes) {
-                writer.write("  " + node + " [style=filled, fillcolor=black, fontcolor=white];\n");
-            }
-
+            
+            // Write edges
             for (int[] edge : edges) {
-                int from = edge[1];
-                int to = edge[0];
-                writer.write("  " + from + " -> " + to + " [color=black];\n");
+                int parent = edge[1];
+                int child = edge[0];
+                writer.write("  " + child + " -> " + parent + ";\n");
             }
-
+            
+            // Write nodes with their colors
             for (int node : nodeColors.keySet()) {
-                writer.write("  " + node + " [style=filled, fillcolor=" + nodeColors.get(node) + "]\n");
+                String color = nodeColors.get(node);
+                writer.write("  " + node + " [style=filled, fillcolor=" + color + "];\n");
             }
-
+            
             writer.write("}\n");
             writer.close();
-
+            
             Process process = Runtime.getRuntime().exec("dot -Tpng " + outputFileName + ".dot -o " + outputFileName + ".png");
             process.waitFor();
+            
+            System.out.println("Graph image generated: " + outputFileName + ".png");
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 
+    // NEW METHOD: Generate PNG with no node colors, outputting "normal.png"
+    public static void generateNormalPngFromGraph(int[][] edges, String outputFileName) {
+        try {
+            BufferedWriter writer = new BufferedWriter(new FileWriter(outputFileName + ".dot"));
+            writer.write("digraph G {\n");
+            writer.write("  rankdir=TB;\n");
+            // Write edges (using reverse order as in the level version)
+            for (int[] edge : edges) {
+                int parent = edge[1];
+                int child = edge[0];
+                writer.write("  " + child + " -> " + parent + ";\n");
+            }
+            writer.write("}\n");
+            writer.close();
+            Process process = Runtime.getRuntime().exec("dot -Tpng " + outputFileName + ".dot -o " + outputFileName + ".png");
+            process.waitFor();
             System.out.println("Graph image generated: " + outputFileName + ".png");
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
@@ -239,31 +263,57 @@ public class DAGPartitioning_upd {
     }
 
     public static List<List<Integer>> clusterSubtrees(List<List<Integer>> subtrees, int cluster_number) {
-        subtrees.sort((list1, list2) -> Integer.compare(list2.size(), list1.size()));
         List<List<Integer>> clusters = new ArrayList<>();
-        int[] clusterSizes = new int[cluster_number];
+        
+        // Keep splitting largest subtrees until we have enough clusters or can't split anymore
+        while (subtrees.size() < cluster_number) {
+            // Sort subtrees by size (largest first)
+            subtrees.sort((a, b) -> Integer.compare(b.size(), a.size()));
+            
+            // Try to split the largest subtree
+            boolean split = false;
+            for (int i = 0; i < subtrees.size() && !split; i++) {
+                List<Integer> largeSubtree = subtrees.get(i);
+                if (largeSubtree.size() > 1) {  // Can only split if size > 1
+                    // Split the subtree into two parts
+                    int midPoint = largeSubtree.size() / 2;
+                    List<Integer> part1 = new ArrayList<>(largeSubtree.subList(0, midPoint));
+                    List<Integer> part2 = new ArrayList<>(largeSubtree.subList(midPoint, largeSubtree.size()));
+                    
+                    // Replace the original subtree with the two parts
+                    subtrees.remove(i);
+                    if (!part1.isEmpty()) subtrees.add(part1);
+                    if (!part2.isEmpty()) subtrees.add(part2);
+                    split = true;
+                }
+            }
+            
+            // If we couldn't split any subtree, we've reached maximum possible clusters
+            if (!split) {
+                System.out.println("Warning: Cannot create more clusters. Maximum possible: " + subtrees.size());
+                break;
+            }
+        }
 
+        // Now distribute the subtrees (which may be split) into clusters
         for (int i = 0; i < cluster_number; i++) {
             clusters.add(new ArrayList<>());
         }
 
+        // Sort again for balanced distribution
+        subtrees.sort((a, b) -> Integer.compare(b.size(), a.size()));
+        
+        // Distribute subtrees to clusters
+        int[] clusterSizes = new int[cluster_number];
         for (List<Integer> subtree : subtrees) {
-            int minClusterIndex = 0;
+            int minIndex = 0;
             for (int i = 1; i < cluster_number; i++) {
-                if (clusterSizes[i] < clusterSizes[minClusterIndex]) {
-                    minClusterIndex = i;
+                if (clusterSizes[i] < clusterSizes[minIndex]) {
+                    minIndex = i;
                 }
             }
-            
-            clusters.get(minClusterIndex).addAll(subtree);
-            clusterSizes[minClusterIndex] += subtree.size();
-            
-        }
-        
-        boolean removed = clusters.removeIf(p -> p.isEmpty());
-        if(removed)
-        {
-            System.out.println("CAN't DO " + cluster_number + " clusters, can do " + clusters.size());
+            clusters.get(minIndex).addAll(subtree);
+            clusterSizes[minIndex] += subtree.size();
         }
 
         return clusters;
@@ -770,73 +820,253 @@ public class DAGPartitioning_upd {
     }
 
     public static List<List<Integer>> partitionTreeIntoClusters(int[][] edges, TreeNode root, int cluster_number, String outputFileName) {
+        // Construire la liste d'adjacence
         Map<Integer, List<Integer>> adjacencyList = buildAdjacencyListFromTree(root);
         List<List<Integer>> longestPaths = new ArrayList<>();
+        
+        // Trouver le plus long chemin
         List<Integer> longestPath = findRandomLongestPath(root);
-        longestPaths.add(longestPath);
+        
+        // Split the critical path into segments
+        int criticalPathSplits = Math.min(cluster_number / 2, longestPath.size() / 3);
+        List<List<Integer>> criticalPathSegments = splitCriticalPath(longestPath, criticalPathSplits);
+        
+        // Extraire les sous-arbres à partir du plus long chemin
         List<List<Integer>> subtrees = getSubtreesFromLongestPath(longestPath, adjacencyList);
+        
+        // Gérer les sous-arbres de grande taille
         List<List<Integer>> biggerSubTree = getSubtreeSizeDifferences(subtrees);
         subtrees = splitOversizedSubtrees(subtrees, biggerSubTree, edges, adjacencyList, longestPaths);
-        List<Integer> flat = longestPaths.stream().flatMap(List::stream).collect(Collectors.toList());
-
-        // Distribute longest path segments into existing clusters
-        distributePathNodesAcrossClusters(flat, subtrees, adjacencyList);
-
-        System.out.println("subtrees " + subtrees);
-
-        // Cluster remaining subtrees
-        List<List<Integer>> clusters = clusterSubtrees(subtrees, cluster_number);
         
-        //clusters = optimizeNodeOnPath(longestPaths, adjacencyList, clusters);
-        
-        if (clusters.size() != cluster_number) {
-            clusters = mergeClusters(clusters, cluster_number, adjacencyList, flat);
+        // If we still don't have enough subtrees, split critical path segments further
+        if (subtrees.size() + criticalPathSegments.size() < cluster_number) {
+            List<List<Integer>> newCriticalPathSegments = new ArrayList<>();
+            for (List<Integer> segment : criticalPathSegments) {
+                if (segment.size() > 1) {
+                    // Split segment in half if possible
+                    int mid = segment.size() / 2;
+                    newCriticalPathSegments.add(new ArrayList<>(segment.subList(0, mid)));
+                    newCriticalPathSegments.add(new ArrayList<>(segment.subList(mid, segment.size())));
+                } else {
+                    newCriticalPathSegments.add(segment);
+                }
+            }
+            criticalPathSegments = newCriticalPathSegments;
         }
-
-        generatePngFromGraph(edges, flat, clusters, outputFileName, adjacencyList);
-
+        
+        // Calculer le nombre de clusters restants après les divisions du chemin critique
+        int remainingClusters = cluster_number - criticalPathSegments.size();
+        
+        // Regrouper les sous-arbres en clusters
+        List<List<Integer>> clusters = clusterSubtrees(subtrees, remainingClusters);
+        
+        // Ajouter les segments du chemin critique aux clusters
+        clusters.addAll(criticalPathSegments);
+        
+        // Optimiser l'affectation des nœuds
+        clusters = optimizeNodeOnPath(longestPaths, adjacencyList, clusters);
+        
+        // Fusionner les clusters si nécessaire
+        if (clusters.size() != cluster_number) {
+            clusters = mergeClusters(clusters, cluster_number, adjacencyList, longestPath);
+        }
+        
+        // Générer un fichier PNG représentant le graph
+        generatePngFromGraph(edges, longestPath, clusters, outputFileName, adjacencyList);
+        
         System.out.println("NEED CLUSTER OF CLUSTER : " + cluster_number);
         System.out.println("NUMBER OF CLUSTER : " + clusters.size());
-        return clusters;
-    }
-
-    private static void distributePathNodesAcrossClusters(List<Integer> longestPath, List<List<Integer>> clusters, Map<Integer, List<Integer>> adjacencyList) {
-        Set<Integer> assignedNodes = new HashSet<>();
-        int lastAssignedCluster = -1;
         
-        for (int i = 0; i < longestPath.size(); i++) {
-            int node = longestPath.get(i);
-            int clusterIndex = findSubtreeClusterFromNode(node, clusters, adjacencyList);
+        List<List<Integer>> allClusters = new ArrayList<>();
+        
+        // Keep splitting and merging until we have exactly cluster_number clusters
+        while (true) {
+            allClusters.clear();
+            allClusters.addAll(subtrees);
+            allClusters.addAll(criticalPathSegments);
             
-            if (clusterIndex == -1 && i > 0) {
-                clusterIndex = lastAssignedCluster; // Assign to the same cluster as the previous node
-            }
-            
-            if (clusterIndex != -1 && !assignedNodes.contains(node)) {
-                clusters.get(clusterIndex).add(node);
-                assignedNodes.add(node);
-                lastAssignedCluster = clusterIndex;
-            }
-        }
-    }
-
-    private static int findSubtreeClusterFromNode(int node, List<List<Integer>> clusters, Map<Integer, List<Integer>> adjacencyList) {
-        for (int i = 0; i < clusters.size(); i++) {
-            List<Integer> cluster = clusters.get(i);
-            if (adjacencyList.containsKey(node)) {
-                for (int child : adjacencyList.get(node)) {
-                    if (cluster.contains(child)) {
-                        return i; // Assign node to the cluster where its subtree starts
+            if (allClusters.size() == cluster_number) {
+                break; // We have exactly the right number
+            } else if (allClusters.size() < cluster_number) {
+                // Need more clusters - split the largest cluster
+                List<Integer> largestCluster = allClusters.stream()
+                    .max((a, b) -> Integer.compare(a.size(), b.size()))
+                    .orElse(null);
+                    
+                if (largestCluster != null && largestCluster.size() > 1) {
+                    int mid = largestCluster.size() / 2;
+                    List<Integer> part1 = new ArrayList<>(largestCluster.subList(0, mid));
+                    List<Integer> part2 = new ArrayList<>(largestCluster.subList(mid, largestCluster.size()));
+                    
+                    if (subtrees.contains(largestCluster)) {
+                        subtrees.remove(largestCluster);
+                        subtrees.add(part1);
+                        subtrees.add(part2);
+                    } else {
+                        criticalPathSegments.remove(largestCluster);
+                        criticalPathSegments.add(part1);
+                        criticalPathSegments.add(part2);
+                    }
+                } else {
+                    System.out.println("Cannot create exactly " + cluster_number + " clusters. Maximum possible: " + allClusters.size());
+                    break;
+                }
+            } else {
+                // Too many clusters - merge the two smallest
+                allClusters.sort((a, b) -> Integer.compare(a.size(), b.size()));
+                List<Integer> merged = new ArrayList<>(allClusters.get(0));
+                merged.addAll(allClusters.get(1));
+                
+                if (subtrees.contains(allClusters.get(0))) {
+                    subtrees.remove(allClusters.get(0));
+                    if (subtrees.contains(allClusters.get(1))) {
+                        subtrees.remove(allClusters.get(1));
+                        subtrees.add(merged);
+                    }
+                } else {
+                    criticalPathSegments.remove(allClusters.get(0));
+                    if (criticalPathSegments.contains(allClusters.get(1))) {
+                        criticalPathSegments.remove(allClusters.get(1));
+                        criticalPathSegments.add(merged);
                     }
                 }
             }
         }
-        return -1; // If no matching subtree cluster is found, return -1
+
+        // Ensure all nodes are assigned to a cluster
+        Set<Integer> allNodes = new HashSet<>();
+        Set<Integer> assignedNodes = new HashSet<>();
+        
+        // Collect all nodes from edges
+        for (int[] edge : edges) {
+            allNodes.add(edge[0]);
+            allNodes.add(edge[1]);
+        }
+        
+        // Collect all assigned nodes
+        for (List<Integer> cluster : allClusters) {
+            assignedNodes.addAll(cluster);
+        }
+        
+        // Find unassigned nodes
+        Set<Integer> unassignedNodes = new HashSet<>(allNodes);
+        unassignedNodes.removeAll(assignedNodes);
+        
+        if (!unassignedNodes.isEmpty()) {
+            // Sort unassigned nodes based on their dependencies
+            List<Integer> sortedUnassigned = new ArrayList<>(unassignedNodes);
+            sortedUnassigned.sort((a, b) -> {
+                boolean aHasDeps = adjacencyList.containsKey(a);
+                boolean bHasDeps = adjacencyList.containsKey(b);
+                return Boolean.compare(bHasDeps, aHasDeps);
+            });
+
+            for (Integer node : sortedUnassigned) {
+                int bestClusterIndex = findBestClusterForNode(node, allClusters, adjacencyList);
+                if (bestClusterIndex >= 0) {
+                    allClusters.get(bestClusterIndex).add(node);
+                }
+            }
+        }
+        
+        // Generate visualization with all nodes assigned
+        generatePngFromGraph(edges, longestPath, allClusters, outputFileName, adjacencyList);
+        
+        System.out.println("Created " + allClusters.size() + " clusters with all nodes assigned");
+        return allClusters;
+    }
+    
+    private static boolean isConnected(int node1, int node2, Map<Integer, List<Integer>> adjacencyList) {
+        // Check direct connections in both directions
+        if (adjacencyList.containsKey(node1) && adjacencyList.get(node1).contains(node2)) return true;
+        if (adjacencyList.containsKey(node2) && adjacencyList.get(node2).contains(node1)) return true;
+        
+        // Check if nodes share a neighbor
+        if (adjacencyList.containsKey(node1) && adjacencyList.containsKey(node2)) {
+            Set<Integer> node1Neighbors = new HashSet<>(adjacencyList.get(node1));
+            Set<Integer> node2Neighbors = new HashSet<>(adjacencyList.get(node2));
+            node1Neighbors.retainAll(node2Neighbors);
+            return !node1Neighbors.isEmpty();
+        }
+        return false;
+    }
+
+    private static int findBestClusterForNode(int node, List<List<Integer>> clusters, Map<Integer, List<Integer>> adjacencyList) {
+        // First, try to find a cluster containing direct parent or child
+        for (int i = 0; i < clusters.size(); i++) {
+            List<Integer> cluster = clusters.get(i);
+            for (int clusterNode : cluster) {
+                // Check if the cluster contains a direct parent
+                if (adjacencyList.containsKey(clusterNode) && 
+                    adjacencyList.get(clusterNode).contains(node)) {
+                    return i;
+                }
+                // Check if the cluster contains a direct child
+                if (adjacencyList.containsKey(node) && 
+                    adjacencyList.get(node).contains(clusterNode)) {
+                    return i;
+                }
+            }
+        }
+
+        // If no direct connections found, fall back to connection count
+        int bestCluster = -1;
+        int maxConnections = -1;
+        
+        for (int i = 0; i < clusters.size(); i++) {
+            List<Integer> cluster = clusters.get(i);
+            int connections = 0;
+            boolean violatesDependencies = false;
+            
+            for (int clusterNode : cluster) {
+                if (isConnected(node, clusterNode, adjacencyList)) {
+                    connections++;
+                }
+            }
+            
+            if (!violatesDependencies && connections > maxConnections) {
+                maxConnections = connections;
+                bestCluster = i;
+            }
+        }
+        
+        // If still no suitable cluster found, return the smallest cluster
+        if (bestCluster == -1) {
+            int minSize = Integer.MAX_VALUE;
+            for (int i = 0; i < clusters.size(); i++) {
+                if (clusters.get(i).size() < minSize) {
+                    minSize = clusters.get(i).size();
+                    bestCluster = i;
+                }
+            }
+        }
+        
+        return bestCluster;
+    }
+
+    public static List<List<Integer>> splitCriticalPath(List<Integer> criticalPath, int desiredSplits) {
+        List<List<Integer>> splits = new ArrayList<>();
+        if (criticalPath == null || criticalPath.isEmpty() || desiredSplits <= 0) {
+            return splits;
+        }
+
+        int segmentSize = criticalPath.size() / desiredSplits;
+        int remainingNodes = criticalPath.size() % desiredSplits;
+
+        int startIndex = 0;
+        for (int i = 0; i < desiredSplits; i++) {
+            int currentSegmentSize = segmentSize + (remainingNodes > 0 ? 1 : 0);
+            if (remainingNodes > 0) remainingNodes--;
+
+            int endIndex = Math.min(startIndex + currentSegmentSize, criticalPath.size());
+            splits.add(new ArrayList<>(criticalPath.subList(startIndex, endIndex)));
+            startIndex = endIndex;
+        }
+        return splits;
     }
 
     public static void main(String[] args) {
-        int node_number = 50;
-        int cluster_number = 20;
+        int cluster_number = 5;
         //int[][] edges = generateRandomReverseTree(node_number); // Générer des arêtes aléatoires
         
         int[][] edges = {
@@ -845,24 +1075,27 @@ public class DAGPartitioning_upd {
             {57,50}, {51,50}, {55,38}, {40,38},
             {47,55}, {56,55}, {52,40}, {42,40},
             {49,47}, {48,47}, {53,52}, {54,52},
-            {63,42}, {62,42}, {41,42},
+            {63,42}, {62,42} , {41,42},
             {58,41},{59,58},{61,58},
             {37,41}, {64,37}, {60,64}, {65,64},
-            {66,36}, {35,36}, {68,35}, {34,35},
+            {36,37}, {66,36}, {35,36}/*, {68,35}, {34,35},
             {69,68}, {17,34}, {32,34},
             {22,32}, {9,32}, {31,32},
             {23,22}, {21,22}, {11,9}, {15,9},
             {13,11}, {10,11}, {14,13}, {12,13},
-            {36,37},
             {18,31}, {30,31}, {19,18}, {20,18},
             {16,30}, {29,30}, {2,29}, {4,29},
             {1,2}, {3,2}, {28,4},
             {5,28}, {26,28}, {7,5}, {6,5},
-            {8,26}, {25,26}
+            {8,26}, {25,26}*/
         };
 
+        // Generate PNG of graph without color, named "normal.png"
+        generateNormalPngFromGraph(edges, "normal");
+
+        // ...existing code that partitions graph and generates colored output...
         TreeNode root = buildTreeFromEdges(edges); // Construire l'arbre à partir des arêtes
-        List<List<Integer>> clusters = partitionTreeIntoClusters(edges, root, cluster_number, "graph_output_upd"); // Partitionner l'arbre en clusters et générer l'image
+        List<List<Integer>> clusters = partitionTreeIntoClusters(edges, root, cluster_number, "graph_output_critical"); // Partitionner l'arbre en clusters et générer l'image
 
         System.out.println("FINAL CLUSTER ");
         int node = 0;
