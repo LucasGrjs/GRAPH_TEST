@@ -1972,8 +1972,8 @@ public class GRID {
 
     public static void main(String[] args) {
         int num_clusters = 8;
-        int rows = 500;
-        int cols = 500;
+        int rows = 100;
+        int cols = 100;
         boolean drawBorders = true;
 
         GRID grid = new GRID(rows, cols);
